@@ -1,5 +1,6 @@
 const axios = require("axios");
 const Order = require("../models/Order");
+const Invoice = require("../models/Invoice");
 
 exports.initializePayment = async (req, res) => {
   try {
@@ -71,10 +72,36 @@ exports.verifyPayment = async (req, res) => {
     if (status === "success") {
       order.status = "paid";
       await order.save();
+
+      // CREATE INVOICE AFTER SUCCESSFUL PAYMENT
+      await Invoice.create({
+        reference: order.reference,
+        customerName: order.userName,
+        email: order.email,
+        phone: order.phone,
+        address: order.address,
+        totalAmount: order.totalAmount,
+        status: "paid",
+        items: order.cartItems
+      });
+
       return res.redirect(`${process.env.FRONTEND_URL}/payment-success`);
     } else {
       order.status = "failed";
       await order.save();
+
+      // CREATE FAILED INVOICE RECORD
+      await Invoice.create({
+        reference: order.reference,
+        customerName: order.userName,
+        email: order.email,
+        phone: order.phone,
+        address: order.address,
+        totalAmount: order.totalAmount,
+        status: "failed",
+        items: order.cartItems
+      });
+
       return res.redirect(`${process.env.FRONTEND_URL}/payment-failed`);
     }
   } catch (error) {
@@ -91,6 +118,12 @@ exports.paystackWebhook = async (req, res) => {
       const reference = event.data.reference;
 
       await Order.update(
+        { status: "paid" },
+        { where: { reference } }
+      );
+
+      // ALSO UPDATE INVOICE STATUS VIA WEBHOOK
+      await Invoice.update(
         { status: "paid" },
         { where: { reference } }
       );

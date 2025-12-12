@@ -43,6 +43,10 @@ app.use("/scheduled-posts", scheduledPostRoutes);
 const orderRoutes = require("./routes/orderRoutes");
 app.use("/orders", orderRoutes);
 
+const invoiceRoutes = require("./routes/invoiceRoutes");
+app.use("/invoices", invoiceRoutes);
+
+
 
 
 const activateScheduledPosts = require("./utils/scheduler");
