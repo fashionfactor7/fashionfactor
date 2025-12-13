@@ -31,7 +31,7 @@ const Order = sequelize.define(
 
     status: {
       type: DataTypes.STRING,
-      defaultValue: "pending", // pending, paid, failed
+      defaultValue: "pending",
     },
 
     reference: {
@@ -42,9 +42,21 @@ const Order = sequelize.define(
     cartItems: {
       type: DataTypes.JSON,
       allowNull: false,
-    }
+    },
+
+    // 🔥 ADMIN FIELDS
+    seen: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+
+    seenAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
   },
   { timestamps: true }
 );
 
 module.exports = Order;
+

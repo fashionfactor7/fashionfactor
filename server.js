@@ -46,6 +46,10 @@ app.use("/orders", orderRoutes);
 const invoiceRoutes = require("./routes/invoiceRoutes");
 app.use("/invoices", invoiceRoutes);
 
+const orderMonitorRoutes = require("./routes/orderMonitorRoutes");
+app.use("/order-monitor", orderMonitorRoutes);
+
+
 
 
 
