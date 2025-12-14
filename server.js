@@ -49,6 +49,8 @@ app.use("/invoices", invoiceRoutes);
 const orderMonitorRoutes = require("./routes/orderMonitorRoutes");
 app.use("/order-monitor", orderMonitorRoutes);
 
+app.use("/api/analytics", require("./routes/analyticsRoutes"));
+
 
 
 
