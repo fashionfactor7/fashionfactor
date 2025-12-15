@@ -51,6 +51,9 @@ app.use("/order-monitor", orderMonitorRoutes);
 
 app.use("/api/analytics", require("./routes/analyticsRoutes"));
 
+app.use("/api/activity", require("./routes/activityRoutes"));
+
+
 
 
 
