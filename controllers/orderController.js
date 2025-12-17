@@ -85,7 +85,7 @@ exports.verifyPayment = async (req, res) => {
         items: order.cartItems
       });
 
-      return res.redirect(`${process.env.FRONTEND_URL}/payment-success`);
+      return res.redirect(`${process.env.FRONTEND_URL}/payment-success.html`);
     } else {
       order.status = "failed";
       await order.save();
@@ -102,7 +102,7 @@ exports.verifyPayment = async (req, res) => {
         items: order.cartItems
       });
 
-      return res.redirect(`${process.env.FRONTEND_URL}/payment-failed`);
+      return res.redirect(`${process.env.FRONTEND_URL}/payment-failed.html`);
     }
   } catch (error) {
     res.status(500).json({ error: error.message });
