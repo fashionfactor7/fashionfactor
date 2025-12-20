@@ -49,6 +49,10 @@ app.use("/invoices", invoiceRoutes);
 const orderMonitorRoutes = require("./routes/orderMonitorRoutes");
 app.use("/order-monitor", orderMonitorRoutes);
 
+const locationRoutes = require("./routes/locationRoutes");
+app.use("/api/locations", locationRoutes);
+
+
 app.use("/api/analytics", require("./routes/analyticsRoutes"));
 
 app.use("/api/activity", require("./routes/activityRoutes"));
