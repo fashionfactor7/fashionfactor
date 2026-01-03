@@ -3,82 +3,85 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const path = require("path");
 
-const authRoutes = require("./routes/authRoutes");
-const sequelize = require("./config/sequelize"); // ✅ ADD THIS
-
 dotenv.config();
 
 const app = express();
 
-// Middleware
+/* =======================
+   MIDDLEWARE
+======================= */
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// Static folder
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// Routes
-app.use("/auth", authRoutes);
+/* =======================
+   🔥 UPTIME ROUTE (NO DB)
+======================= */
+const uptimeRoutes = require("./routes/uptimeRoutes");
+app.use("/uptime", uptimeRoutes);
 
-//webhook
-app.use("/orders/paystack-webhook", express.raw({ type: "application/json" }));
-
-
-const categoryRoutes = require("./routes/categoryRoutes");
-app.use("/categories", categoryRoutes);
-
-const productRoutes = require("./routes/productRoutes");
-app.use("/products", productRoutes);
-
-const newsletterRoutes = require("./routes/newsletterRoutes");
-app.use("/newsletter", newsletterRoutes);
-
-const broadcastRoutes = require("./routes/broadcastRoutes");
-app.use("/broadcasts", broadcastRoutes);
-
-const scheduledPostRoutes = require("./routes/scheduledPostRoutes");
-app.use("/scheduled-posts", scheduledPostRoutes);
-
-const orderRoutes = require("./routes/orderRoutes");
-app.use("/orders", orderRoutes);
-
-const invoiceRoutes = require("./routes/invoiceRoutes");
-app.use("/invoices", invoiceRoutes);
-
-const orderMonitorRoutes = require("./routes/orderMonitorRoutes");
-app.use("/order-monitor", orderMonitorRoutes);
-
-const locationRoutes = require("./routes/locationRoutes");
-app.use("/api/locations", locationRoutes);
-
-
+/* =======================
+   API ROUTES
+======================= */
+app.use("/auth", require("./routes/authRoutes"));
+app.use("/categories", require("./routes/categoryRoutes"));
+app.use("/products", require("./routes/productRoutes"));
+app.use("/newsletter", require("./routes/newsletterRoutes"));
+app.use("/broadcasts", require("./routes/broadcastRoutes"));
+app.use("/scheduled-posts", require("./routes/scheduledPostRoutes"));
+app.use("/orders", require("./routes/orderRoutes"));
+app.use("/invoices", require("./routes/invoiceRoutes"));
+app.use("/order-monitor", require("./routes/orderMonitorRoutes"));
+app.use("/api/locations", require("./routes/locationRoutes"));
 app.use("/api/analytics", require("./routes/analyticsRoutes"));
-
 app.use("/api/activity", require("./routes/activityRoutes"));
 
+/* =======================
+   PAYSTACK WEBHOOK
+======================= */
+app.use(
+  "/orders/paystack-webhook",
+  express.raw({ type: "application/json" })
+);
 
-
-
-
-
-const activateScheduledPosts = require("./utils/scheduler");
-activateScheduledPosts();
-
-
-// Test route
+/* =======================
+   ROOT (DO NOT USE FOR UPTIME)
+======================= */
 app.get("/", (req, res) => {
   res.json({ message: "Fashion Factor API is running!" });
 });
 
-// Sync Models
-sequelize
-  .sync()
-  .then(() => console.log("✅ Sequelize models synchronized"))
-  .catch(err => console.error("❌ Sequelize sync error:", err));
+/* =======================
+   DATABASE INIT (OPTIMIZED)
+======================= */
+const sequelize = require("./config/sequelize");
 
-// Start server
+sequelize
+  .authenticate()
+  .then(async () => {
+    console.log("✅ Database connected");
+
+    // ⚠️ Prevents unnecessary compute usage in production
+    if (process.env.NODE_ENV !== "production") {
+      await sequelize.sync();
+      console.log("✅ Sequelize models synchronized");
+    }
+  })
+  .catch(err => console.error("❌ DB error:", err));
+
+/* =======================
+   SCHEDULER (CONTROLLED)
+======================= */
+if (process.env.ENABLE_SCHEDULER === "true") {
+  const activateScheduledPosts = require("./utils/scheduler");
+  activateScheduledPosts();
+}
+
+/* =======================
+   START SERVER
+======================= */
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`FashionFactor Server running on port ${PORT}`);
+  console.log(`🚀 FashionFactor Server running on port ${PORT}`);
 });
